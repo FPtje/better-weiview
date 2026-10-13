@@ -1,5 +1,6 @@
 package nl.falcop.betterweiview
 
+import android.content.Context
 import android.net.Network
 import android.os.Bundle
 import android.view.SurfaceView
@@ -13,10 +14,18 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material3.Button
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -31,6 +40,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -39,8 +49,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.content.edit
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
@@ -54,6 +66,7 @@ import nl.falcop.betterweiview.icap.IcapException
 import nl.falcop.betterweiview.icap.VideoFrame
 import nl.falcop.betterweiview.net.CameraNetworkMonitor
 import nl.falcop.betterweiview.video.MjpegRenderer
+import nl.falcop.betterweiview.video.TiltEstimator
 
 class MainActivity : ComponentActivity() {
     private lateinit var monitor: CameraNetworkMonitor
@@ -137,13 +150,20 @@ private fun VideoScreen(network: Network, onExit: () -> Unit) {
         }
     }
 
+    val prefs = remember { context.getSharedPreferences(PREFS, Context.MODE_PRIVATE) }
+    var autoRotate by remember { mutableStateOf(prefs.getBoolean(PREF_AUTO_ROTATE, true)) }
+    val currentAutoRotate by rememberUpdatedState(autoRotate)
+
     LaunchedEffect(network) {
+        val tilt = TiltEstimator()
         IcapClient(network).frames()
             .map { frame ->
                 if (frame.codec != VideoFrame.CODEC_MJPEG) {
                     throw IcapException("unsupported video codec ${frame.codec}")
                 }
-                renderer.render(frame.data)
+                // Track tilt even while disabled so enabling it is instant and smooth.
+                val angle = frame.accel?.let { tilt.update(it.x, it.y, it.z) }
+                renderer.render(frame.data, rotation = angle?.takeIf { currentAutoRotate })
             }
             .flowOn(Dispatchers.Default)
             .catch { e ->
@@ -153,13 +173,45 @@ private fun VideoScreen(network: Network, onExit: () -> Unit) {
             .collect { drawn -> if (drawn) firstFrame = true }
     }
 
-    Box(modifier = Modifier.fillMaxSize().background(Color.Black), contentAlignment = Alignment.Center) {
-        AndroidView(
-            factory = { ctx -> SurfaceView(ctx).apply { holder.addCallback(renderer) } },
-            modifier = Modifier.fillMaxSize(),
-        )
-        if (!firstFrame) {
-            CircularProgressIndicator(modifier = Modifier.size(48.dp), color = Color.White)
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black)
+            .windowInsetsPadding(WindowInsets.safeDrawing),
+    ) {
+        Box(modifier = Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
+            AndroidView(
+                factory = { ctx -> SurfaceView(ctx).apply { holder.addCallback(renderer) } },
+                modifier = Modifier.fillMaxSize(),
+            )
+            if (!firstFrame) {
+                CircularProgressIndicator(modifier = Modifier.size(48.dp), color = Color.White)
+            }
+        }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .toggleable(value = autoRotate, role = Role.Checkbox, onValueChange = {
+                    autoRotate = it
+                    prefs.edit { putBoolean(PREF_AUTO_ROTATE, it) }
+                })
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center,
+        ) {
+            Checkbox(
+                checked = autoRotate,
+                onCheckedChange = null,
+                colors = CheckboxDefaults.colors(uncheckedColor = Color.White, checkmarkColor = Color.Black, checkedColor = Color.White),
+            )
+            Text(
+                text = stringResource(R.string.auto_rotate),
+                color = Color.White,
+                modifier = Modifier.padding(start = 8.dp),
+            )
         }
     }
 }
+
+private const val PREFS = "settings"
+private const val PREF_AUTO_ROTATE = "auto_rotate"

@@ -19,8 +19,12 @@ class VideoFrame(
     val isKey: Boolean,
     /** Camera clock in 10 ms units. */
     val tick: Int,
+    /** Accelerometer reading; only present in extended (0x34/0x35) frames. */
+    val accel: Accel?,
     val data: ByteArray,
 ) {
+    class Accel(val x: Int, val y: Int, val z: Int)
+
     companion object {
         const val CODEC_MJPEG = 0
         const val CODEC_H264 = 2
@@ -129,7 +133,16 @@ class IcapClient(
         return cmd to payload
     }
 
-    private class Header(val codec: Int, val resolution: Int, val isKey: Boolean, val tick: Int, val length: Int)
+    private class Header(
+        val codec: Int,
+        val resolution: Int,
+        val isKey: Boolean,
+        val tick: Int,
+        val accel: VideoFrame.Accel?,
+        val length: Int,
+    ) {
+        fun frame(data: ByteArray) = VideoFrame(codec, resolution, isKey, tick, accel, data)
+    }
 
     private class FragmentAssembler {
         private var header: Header? = null
@@ -156,7 +169,7 @@ class IcapClient(
             }
             if (filled < h.length) return null
             header = null
-            return VideoFrame(h.codec, h.resolution, h.isKey, h.tick, buffer.copyOf(h.length))
+            return h.frame(buffer.copyOf(h.length))
         }
 
         private fun reset(): VideoFrame? {
@@ -199,6 +212,10 @@ class IcapClient(
 
         private fun intLe(v: Int) = ByteArray(4).also { writeIntLe(it, 0, v) }
 
+        /** Signed 16-bit little-endian. */
+        private fun readShortLe(b: ByteArray, off: Int): Int =
+            ((b[off].toInt() and 0xFF) or (b[off + 1].toInt() shl 8)).toShort().toInt()
+
         private fun headerSize(extended: Boolean) = if (extended) 23 else 17
 
         private fun parseHeader(b: ByteArray, off: Int, extended: Boolean): Header? {
@@ -209,6 +226,11 @@ class IcapClient(
                 resolution = b[off + 1].toInt() and 0xFF,
                 isKey = b[off + 4].toInt() != 0,
                 tick = readIntLe(b, off + 5),
+                accel = if (extended) {
+                    VideoFrame.Accel(readShortLe(b, off + 13), readShortLe(b, off + 15), readShortLe(b, off + 17))
+                } else {
+                    null
+                },
                 length = readIntLe(b, lenOff).takeIf { it in 0..MAX_PAYLOAD } ?: return null,
             )
         }
@@ -217,7 +239,7 @@ class IcapClient(
             val h = parseHeader(payload, 0, extended) ?: return null
             val start = headerSize(extended)
             if (payload.size < start + h.length) return null
-            return VideoFrame(h.codec, h.resolution, h.isKey, h.tick, payload.copyOfRange(start, start + h.length))
+            return h.frame(payload.copyOfRange(start, start + h.length))
         }
     }
 }

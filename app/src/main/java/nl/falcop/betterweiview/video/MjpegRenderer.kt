@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.graphics.Paint
+import android.graphics.Path
 import android.graphics.RectF
 import android.view.SurfaceHolder
 
@@ -18,6 +19,7 @@ class MjpegRenderer : SurfaceHolder.Callback {
     private var reusable: Bitmap? = null
     private val paint = Paint(Paint.FILTER_BITMAP_FLAG)
     private val dst = RectF()
+    private val circle = Path()
 
     override fun surfaceCreated(holder: SurfaceHolder) {
         synchronized(lock) { this.holder = holder }
@@ -31,8 +33,12 @@ class MjpegRenderer : SurfaceHolder.Callback {
         synchronized(lock) { this.holder = null }
     }
 
-    /** Returns false if the JPEG could not be decoded. */
-    fun render(jpeg: ByteArray): Boolean {
+    /**
+     * Draws [jpeg] aspect-fit. With a [rotation] (degrees clockwise), the picture is turned
+     * about its centre and clipped to its inscribed circle, so the corners don't swing in
+     * and out of view. Returns false if the JPEG could not be decoded.
+     */
+    fun render(jpeg: ByteArray, rotation: Float? = null): Boolean {
         val bitmap = decode(jpeg) ?: return false
         synchronized(lock) {
             val h = holder ?: return true
@@ -44,7 +50,17 @@ class MjpegRenderer : SurfaceHolder.Callback {
                 val w = bitmap.width * scale
                 val hgt = bitmap.height * scale
                 dst.set((canvas.width - w) / 2, (canvas.height - hgt) / 2, (canvas.width + w) / 2, (canvas.height + hgt) / 2)
-                canvas.drawBitmap(bitmap, null, dst, paint)
+                if (rotation == null) {
+                    canvas.drawBitmap(bitmap, null, dst, paint)
+                } else {
+                    canvas.save()
+                    circle.rewind()
+                    circle.addCircle(dst.centerX(), dst.centerY(), minOf(w, hgt) / 2, Path.Direction.CW)
+                    canvas.clipPath(circle)
+                    canvas.rotate(rotation, dst.centerX(), dst.centerY())
+                    canvas.drawBitmap(bitmap, null, dst, paint)
+                    canvas.restore()
+                }
             } finally {
                 h.unlockCanvasAndPost(canvas)
             }

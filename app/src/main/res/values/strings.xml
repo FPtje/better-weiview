@@ -4,5 +4,6 @@
     <string name="connect">Connect</string>
     <string name="hint_searching">Join the camera\'s Wi-Fi (weiview-…) to connect</string>
     <string name="hint_ready">Camera found</string>
+    <string name="auto_rotate">Auto-rotate with camera</string>
     <string name="error_stream">Connection to the camera lost: %1$s</string>
 </resources>

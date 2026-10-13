@@ -24,6 +24,9 @@ adb install -r app/build/outputs/apk/debug/app-debug.apk
 2. Open Better Weiview. The button becomes enabled once the camera answers at
    `192.168.1.1` (detected by reachability, so no location permission is needed).
 3. Tap **Connect** for full-screen video. Press back to stop.
+4. **Auto-rotate with camera** (checkbox under the video, remembered between launches)
+   uses the camera's accelerometer to keep the picture upright as you twist the camera.
+   The view is cropped to a circle while it is on.
 
 All camera traffic is bound to the camera's Wi-Fi network, so mobile data can stay on.
 
