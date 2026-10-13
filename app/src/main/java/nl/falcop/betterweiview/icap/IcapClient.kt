@@ -1,6 +1,7 @@
 package nl.falcop.betterweiview.icap
 
 import android.net.Network
+import android.os.SystemClock
 import java.io.DataInputStream
 import java.io.EOFException
 import java.io.IOException
@@ -67,7 +68,17 @@ class IcapClient(
             output.flush()
 
             val assembler = FragmentAssembler()
+            var lastSent = SystemClock.elapsedRealtime()
             while (true) {
+                // The camera drops sessions that stay silent; the vendor SDK sends an empty
+                // KEEPALIVE after 30 s without traffic. Frames arrive ~19/s, so checking here
+                // is frequent enough.
+                val now = SystemClock.elapsedRealtime()
+                if (now - lastSent >= KEEPALIVE_INTERVAL_MS) {
+                    output.write(packet(CMD_KEEPALIVE))
+                    output.flush()
+                    lastSent = now
+                }
                 val (cmd, payload) = readPacket(input)
                 val frame = when (cmd) {
                     CMD_VIDEO -> wholeFrame(payload, extended = false)
@@ -184,6 +195,7 @@ class IcapClient(
 
         private const val CONNECT_TIMEOUT_MS = 5_000
         private const val READ_TIMEOUT_MS = 5_000
+        private const val KEEPALIVE_INTERVAL_MS = 10_000L
         private const val MAX_PAYLOAD = 8 * 1024 * 1024
 
         // Magic 05 33 8B 11 read as a little-endian int.
@@ -194,6 +206,7 @@ class IcapClient(
         const val CMD_LOGIN1_RESP = 0x01
         const val CMD_LOGIN2_REQ = 0x02
         const val CMD_LOGIN2_RESP = 0x03
+        const val CMD_KEEPALIVE = 0x04
         const val CMD_PLAY_VIDEO = 0x0E
         const val CMD_VIDEO = 0x11
         const val CMD_SET_VIDEO_PERFORMANCE = 0x1C

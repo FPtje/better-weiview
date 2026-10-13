@@ -21,6 +21,8 @@ CMD_LOGIN1_REQ = 0x00
 CMD_LOGIN1_RESP = 0x01
 CMD_LOGIN2_REQ = 0x02
 CMD_LOGIN2_RESP = 0x03
+CMD_KEEPALIVE = 0x04
+KEEPALIVE_INTERVAL = 10.0  # vendor SDK: after 30 s without sending
 CMD_PLAY_VIDEO = 0x0E
 CMD_VIDEO = 0x11
 CMD_SET_VIDEO_PERFORMANCE = 0x1C
@@ -243,8 +245,12 @@ def main():
     nbytes = 0
     frag = None  # (header, bytearray)
     t_end = time.time() + a.seconds
+    last_sent = time.time()
     with open(a.out, "wb") as out:
         while time.time() < t_end:
+            if time.time() - last_sent >= KEEPALIVE_INTERVAL:
+                s.sendall(pack(CMD_KEEPALIVE))
+                last_sent = time.time()
             cmd, p = rd.packet()
             frame = None
             if cmd == CMD_VIDEO:

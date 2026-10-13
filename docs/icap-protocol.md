@@ -78,8 +78,11 @@ client                                   camera
 `extra` carries a retry-delay hint. With OK, observed values are `extra = 131071` and
 a camera ID equal to its MAC address.
 
-A 60-second stream ran without any keepalive from the client. The camera keeps sending
-for as long as the TCP connection is open.
+**Keepalive:** while connected, the client sends **cmd 0x04 with an empty payload**
+whenever it hasn't sent anything for a while. The vendor SDK sends it after 30 s of
+silence; our clients send it every 10 s. The SDK also treats 40 s without any received
+data as a dead connection and reconnects automatically. Without keepalives the camera
+drops the session (a phone session ended after about 90 s).
 
 Other commands seen in the SDK, not needed for live view: 0x06/0x08 string results,
 0x0A/0x0C result codes, 0x0D property/status push, 0x0F, 0x12 stop video, 0x19 speak
