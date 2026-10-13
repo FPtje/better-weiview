@@ -23,3 +23,8 @@ captures/
 
 # The original vendor app is flagged as malware; never commit it.
 bad_app/
+
+# Release signing secrets (keystore lives in ~/.android/keystores)
+keystore.properties
+*.jks
+*.keystore

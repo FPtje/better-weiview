@@ -18,6 +18,26 @@ export ANDROID_HOME=$HOME/Android/Sdk
 adb install -r app/build/outputs/apk/debug/app-debug.apk
 ```
 
+### Release build
+
+Release signing reads `keystore.properties` in the project root (gitignored):
+
+```properties
+storeFile=/home/falcop/.android/keystores/better-weiview-release.jks
+storePassword=…
+keyAlias=release
+keyPassword=…
+```
+
+```sh
+./gradlew assembleRelease
+adb install -r app/build/outputs/apk/release/app-release.apk
+```
+
+Back up the keystore and its password: updates must be signed with the same key. A
+debug build can't be installed over the release build (or the reverse) without
+uninstalling first.
+
 ## Use
 
 1. Turn on the ear cam and join its Wi-Fi (`weiview-XXXX`) on the phone.
