@@ -1,8 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "mcp__rea__inspect_android_package",
-      "mcp__rea__decode_android_resources"
-    ]
-  }
-}

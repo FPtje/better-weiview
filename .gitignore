@@ -1,13 +1,23 @@
-tools/__pycache__
-__pycache__
-**/*.pyc
+# Python
+__pycache__/
+*.pyc
+.mypy_cache/
+
+# Gradle / Android
 .gradle/
 .kotlin/
 build/
 local.properties
+captures/
+
+# IDE
 .idea/
 *.iml
-captures/
+
+# Machine-local Claude Code settings
+.claude/settings.local.json
+
+# Stream dumps from tools/icap_client.py
 *.mjpeg
 *.h264
 
