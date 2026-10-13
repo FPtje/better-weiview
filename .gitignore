@@ -1,0 +1,12 @@
+.gradle/
+.kotlin/
+build/
+local.properties
+.idea/
+*.iml
+captures/
+*.mjpeg
+*.h264
+
+# The original vendor app is flagged as malware; never commit it.
+bad_app/
