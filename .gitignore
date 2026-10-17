@@ -28,3 +28,6 @@ bad_app/
 keystore.properties
 *.jks
 *.keystore
+
+# direnv / nix
+.direnv/

@@ -9,14 +9,17 @@ Play Protect flags it as malware.
 
 ## Build and install
 
-Requirements: JDK 21 and the Android SDK (platform 37.2, build-tools 36).
+The toolchain (JDK 21, Android SDK with platform 37.2 and build-tools 36, adb, jadx,
+apktool, Ghidra, Python, ffmpeg) comes from the Nix flake. With
+[direnv](https://direnv.net) run `direnv allow` once; otherwise use `nix develop`.
 
 ```sh
-export JAVA_HOME=/usr/lib/jvm/java-21-openjdk
-export ANDROID_HOME=$HOME/Android/Sdk
 ./gradlew testDebugUnitTest assembleDebug
 adb install -r app/build/outputs/apk/debug/app-debug.apk
 ```
+
+Don't keep a `local.properties` with `sdk.dir`: AGP prefers it over the flake's
+`ANDROID_HOME`.
 
 ### Release build
 
