@@ -60,7 +60,7 @@
         sha256 = "6e5eacf500b64292bfb73c49797c1958f6ee44646e43e868039ae7feb573ff75";
       };
 
-      jdk = pkgs.jdk21;
+      jdk = pkgs.jdk25;
     in
     {
       devShells.${system}.default = pkgs.mkShell {

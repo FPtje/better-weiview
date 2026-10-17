@@ -11,15 +11,15 @@ inherits the environment variables below. Check with `echo $REA_JADX_MCP_JAR`.
 
 | Tool | Provided as |
 | --- | --- |
-| JDK 21 | `JAVA_HOME` |
-| JADX headless bridge 0.7.1 (fetched, sha256-pinned) | `REA_JADX_MCP_JAR` |
-| Apktool 3.0.3 | `REA_APKTOOL_COMMAND` |
-| adb (platform-tools 37.0.1) | `REA_ADB_PATH`, also on `PATH` |
+| JDK | `JAVA_HOME` |
+| JADX headless bridge (fetched, sha256-pinned) | `REA_JADX_MCP_JAR` |
+| Apktool | `REA_APKTOOL_COMMAND` |
+| adb (platform-tools) | `REA_ADB_PATH`, also on `PATH` |
 | Android SDK, read-only in the Nix store | `ANDROID_HOME` / `ANDROID_SDK_ROOT` |
-| Ghidra 12.1.4 | `GHIDRA_INSTALL_DIR` (headless: `$GHIDRA_INSTALL_DIR/support/analyzeHeadless`) |
-| jadx 1.5.6 CLI, Python 3 + mypy, ffmpeg (`ffplay`), bun (for `bun`/`bunx`) | `PATH` |
+| Ghidra | `GHIDRA_INSTALL_DIR` (headless: `$GHIDRA_INSTALL_DIR/support/analyzeHeadless`) |
+| jadx CLI, Python 3 + mypy, ffmpeg (`ffplay`), bun (for `bun`/`bunx`) | `PATH` |
 
-Platform 37.2 is newer than nixpkgs ships, so the flake fetches it from Google directly.
+Platform is newer than nixpkgs ships, so the flake fetches it from Google directly.
 The SDK is read-only: Gradle can't auto-install SDK components, so new ones must be added
 to `flake.nix`. Don't create `local.properties` with `sdk.dir`; AGP would prefer it over
 `ANDROID_HOME`.

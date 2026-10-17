@@ -9,7 +9,7 @@ Play Protect flags it as malware.
 
 ## Build and install
 
-The toolchain (JDK 21, Android SDK with platform 37.2 and build-tools 36, adb, jadx,
+The toolchain (JDK, Android SDK with platform and build-tools, adb, jadx,
 apktool, Ghidra, Python, ffmpeg) comes from the Nix flake. With
 [direnv](https://direnv.net) run `direnv allow` once; otherwise use `nix develop`.
 
