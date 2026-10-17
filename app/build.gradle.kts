@@ -7,6 +7,7 @@ plugins {
 
 android {
     namespace = "nl.falcop.betterweiview"
+    buildToolsVersion = "37.0.0"
     compileSdk {
         version = release(37) { minorApiLevel = 2 }
     }

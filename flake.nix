@@ -38,7 +38,7 @@
 
       baseSdk = (pkgs.androidenv.composeAndroidPackages {
         platformToolsVersion = "37.0.1";
-        buildToolsVersions = [ "36.0.0" ];
+        buildToolsVersions = [ "37.0.0" ];
         platformVersions = [ "36" ];
         includeEmulator = false;
         includeSystemImages = false;
@@ -84,7 +84,7 @@
         GHIDRA_INSTALL_DIR = "${pkgs.ghidra}/lib/ghidra";
 
         shellHook = ''
-          export PATH="${sdkRoot}/platform-tools:${sdkRoot}/build-tools/36.0.0:$PATH"
+          export PATH="${sdkRoot}/platform-tools:${sdkRoot}/build-tools/37.0.0:$PATH"
           # AGP prefers local.properties' sdk.dir over ANDROID_HOME, which would
           # bypass the pinned SDK above.
           if [ -f local.properties ] && ! grep -q "${sdkRoot}" local.properties; then
