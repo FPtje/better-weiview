@@ -2,6 +2,7 @@ package io.github.fptje.betterweiview.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
@@ -24,8 +25,13 @@ fun ConnectScreen(enabled: Boolean, onConnect: () -> Unit) {
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Button(onClick = onConnect, enabled = enabled) {
-                Text(stringResource(R.string.connect), style = MaterialTheme.typography.titleLarge)
+            // About twice the default Button size: doubled padding and text (titleLarge is 22sp).
+            Button(
+                onClick = onConnect,
+                enabled = enabled,
+                contentPadding = PaddingValues(horizontal = 48.dp, vertical = 16.dp),
+            ) {
+                Text(stringResource(R.string.connect), style = MaterialTheme.typography.displayMedium)
             }
             Text(
                 text = stringResource(if (enabled) R.string.hint_ready else R.string.hint_searching),
