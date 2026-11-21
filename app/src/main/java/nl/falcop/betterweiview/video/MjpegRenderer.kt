@@ -7,6 +7,7 @@ import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.RectF
 import android.view.SurfaceHolder
+import androidx.core.graphics.withSave
 
 /**
  * Decodes MJPEG frames and draws them aspect-fit onto a SurfaceView.
@@ -25,9 +26,7 @@ class MjpegRenderer : SurfaceHolder.Callback {
         synchronized(lock) { this.holder = holder }
     }
 
-    override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {
-        synchronized(lock) { this.holder = holder }
-    }
+    override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) = Unit
 
     override fun surfaceDestroyed(holder: SurfaceHolder) {
         synchronized(lock) { this.holder = null }
@@ -50,16 +49,14 @@ class MjpegRenderer : SurfaceHolder.Callback {
                 val w = bitmap.width * scale
                 val hgt = bitmap.height * scale
                 dst.set((canvas.width - w) / 2, (canvas.height - hgt) / 2, (canvas.width + w) / 2, (canvas.height + hgt) / 2)
-                if (rotation == null) {
-                    canvas.drawBitmap(bitmap, null, dst, paint)
-                } else {
-                    canvas.save()
-                    circle.rewind()
-                    circle.addCircle(dst.centerX(), dst.centerY(), minOf(w, hgt) / 2, Path.Direction.CW)
-                    canvas.clipPath(circle)
-                    canvas.rotate(rotation, dst.centerX(), dst.centerY())
-                    canvas.drawBitmap(bitmap, null, dst, paint)
-                    canvas.restore()
+                canvas.withSave {
+                    if (rotation != null) {
+                        circle.rewind()
+                        circle.addCircle(dst.centerX(), dst.centerY(), minOf(w, hgt) / 2, Path.Direction.CW)
+                        clipPath(circle)
+                        rotate(rotation, dst.centerX(), dst.centerY())
+                    }
+                    drawBitmap(bitmap, null, dst, paint)
                 }
             } finally {
                 h.unlockCanvasAndPost(canvas)

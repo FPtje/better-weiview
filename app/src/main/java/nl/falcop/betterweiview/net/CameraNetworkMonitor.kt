@@ -18,10 +18,11 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import nl.falcop.betterweiview.icap.Camera
 
 /**
  * Watches Wi-Fi networks and reports the one where the ear cam answers at
- * 192.168.1.1. Detection is by reachability, so no location permission is
+ * [Camera.HOST]. Detection is by reachability, so no location permission is
  * needed to read the SSID.
  */
 class CameraNetworkMonitor(context: Context) {
@@ -76,7 +77,7 @@ class CameraNetworkMonitor(context: Context) {
     }
 
     private fun isCamera(network: Network): Boolean = runCatching {
-        val conn = network.openConnection(URL(PROBE_URL)) as HttpURLConnection
+        val conn = network.openConnection(URL(Camera.PROPERTIES_URL)) as HttpURLConnection
         try {
             conn.connectTimeout = PROBE_TIMEOUT_MS
             conn.readTimeout = PROBE_TIMEOUT_MS
@@ -89,7 +90,6 @@ class CameraNetworkMonitor(context: Context) {
     }.getOrDefault(false)
 
     private companion object {
-        const val PROBE_URL = "http://192.168.1.1/get_properties.cgi?user=admin&pwd="
         const val PROBE_TIMEOUT_MS = 2_000
         const val PROBE_INTERVAL_MS = 3_000L
     }

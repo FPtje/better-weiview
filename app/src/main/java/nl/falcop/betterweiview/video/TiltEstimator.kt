@@ -36,10 +36,6 @@ class TiltEstimator(private val smoothing: Float = 0.7f) {
         return Math.toDegrees(atan2(cy, cx).toDouble()).toFloat()
     }
 
-    fun reset() {
-        cx = 1f; cy = 0f; initialised = false
-    }
-
     private companion object {
         /** Below this share of gravity across the lens axis, the roll reading is just noise. */
         const val MIN_ROLL_FRACTION = 0.25f

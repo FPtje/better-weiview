@@ -124,16 +124,3 @@ class CamBlowfish(key: ByteArray) {
         }
     }
 }
-
-internal fun readIntLe(b: ByteArray, off: Int): Int =
-    (b[off].toInt() and 0xFF) or
-        ((b[off + 1].toInt() and 0xFF) shl 8) or
-        ((b[off + 2].toInt() and 0xFF) shl 16) or
-        ((b[off + 3].toInt() and 0xFF) shl 24)
-
-internal fun writeIntLe(b: ByteArray, off: Int, v: Int) {
-    b[off] = v.toByte()
-    b[off + 1] = (v ushr 8).toByte()
-    b[off + 2] = (v ushr 16).toByte()
-    b[off + 3] = (v ushr 24).toByte()
-}
