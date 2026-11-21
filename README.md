@@ -18,6 +18,10 @@ Note: this app does _not_ have the ability to take photos or videos. If you want
 This is _Personal software_, meaning that the main audience for this software is myself. Feel free to try it out, fork it, play with it.
 If you do hit a problem or would like to request a feature, feel free to still write a quick issue. I will consider maintaining it properly if there is interest.
 
+## Install
+
+Check out the [releases tab](https://github.com/FPtje/better-weiview/releases) for the APK. You can either download this on your phone and install it from a file manager (easy), or download it to a computer and use the adb command line tool to install it (harder).
+
 ## Use the app
 
 1. Turn on the ear cam.
