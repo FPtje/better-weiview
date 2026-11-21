@@ -1,39 +1,45 @@
-# Agent notes: tools available for REA
+# Agent notes
 
-REA (Reverse Engineer Anything) is registered with Claude Code as the MCP server `rea`
-(`bunx -y rea-agents@latest mcp`). All tooling comes from the Nix flake (`flake.nix`),
-loaded by direnv (`.envrc`: `use flake`). Nothing is installed globally.
+The Nix flake (`flake.nix`) supplies all of the tools.
+Direnv loads the flake (`.envrc`: `use flake`).
+No tool is installed globally.
 
-**Start Claude Code from inside this directory with direnv loaded**, so the MCP server
-inherits the environment variables below. Check with `echo $REA_JADX_MCP_JAR`.
+Start the agent in this directory with direnv loaded.
+If the environment is not loaded, run commands through `nix develop --command`.
 
-## Android / APK tools (all from the flake)
+## Tasks
 
-| Tool | Provided as |
+Use the `justfile` for the usual tasks.
+Run `just` to show the full list.
+Run `just check` after each change.
+This recipe runs the Kotlin unit tests and `mypy --strict` on `tools/icap_client.py`.
+
+## Tools from the flake
+
+| Tool | Location |
 | --- | --- |
 | JDK | `JAVA_HOME` |
-| JADX headless bridge (fetched, sha256-pinned) | `REA_JADX_MCP_JAR` |
-| Apktool | `REA_APKTOOL_COMMAND` |
-| adb (platform-tools) | `REA_ADB_PATH`, also on `PATH` |
-| Android SDK, read-only in the Nix store | `ANDROID_HOME` / `ANDROID_SDK_ROOT` |
-| Ghidra | `GHIDRA_INSTALL_DIR` (headless: `$GHIDRA_INSTALL_DIR/support/analyzeHeadless`) |
-| jadx CLI, Python 3 + mypy, ffmpeg (`ffplay`), bun (for `bun`/`bunx`) | `PATH` |
+| Android SDK (read-only, in the Nix store) | `ANDROID_HOME` and `ANDROID_SDK_ROOT` |
+| adb, build-tools | `PATH` |
+| Ghidra | `GHIDRA_INSTALL_DIR`. For headless mode, use `$GHIDRA_INSTALL_DIR/support/analyzeHeadless`. |
+| `just`, jadx, Apktool, Python 3, mypy, FFmpeg (`ffplay`) | `PATH` |
 
-Platform is newer than nixpkgs ships, so the flake fetches it from Google directly.
-The SDK is read-only: Gradle can't auto-install SDK components, so new ones must be added
-to `flake.nix`. Don't create `local.properties` with `sdk.dir`; AGP would prefer it over
-`ANDROID_HOME`.
+Nixpkgs does not supply Android platform 37.2.
+Thus, the flake downloads it from Google directly.
 
-### Status
+The SDK is read-only, so Gradle cannot install SDK components.
+To add an SDK component, change `flake.nix`.
 
-- **APK static analysis, resource decoding:** JADX and Apktool work through REA.
-- **Device inspection and APK pulls:** adb is available; no device or emulator is set up.
-- **Native analysis:** Ghidra works headless only (an existing project is at
-  `/home/falcop/tools/ghidra/work/proj`). Hopper and IDA are not configured.
+CAUTION: Do not make a `local.properties` file with `sdk.dir`.
+The Android Gradle plugin uses `sdk.dir` and ignores `ANDROID_HOME`.
 
-## Notes
+## Reverse engineering
 
-- Run `rea doctor --client claude_code` to check the Claude Code registration.
-- `rea doctor` (full) reports the skill as stale. The Claude Code skill is installed at
-  `/home/falcop/.claude/skills/reverse-engineer-anything`. A refresh is pending:
-  `bunx rea-agents@6.4.0 setup --client claude_code --skill-client claude_code --yes`.
+WARNING: The original Weiview APK is malware.
+Do not use its code or libraries in this project.
+Run it only in a disposable emulator.
+
+- For static analysis of the APK, use jadx and Apktool.
+- For native analysis, use Ghidra in headless mode.
+- Adb is available.
+  No device or emulator is set up.

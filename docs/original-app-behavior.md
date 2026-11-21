@@ -1,89 +1,124 @@
-# What the original Weiview app did
+# Behavior of the original Weiview app
 
-This is a static analysis of Weiview 1.0.29 (`bad_app/Weiview_1.0.29_Apkpure.apk`, package
-`com.weiview`, SHA-256 `0c500a62…a4249`). It was done with REA (JADX and Apktool
-providers), the `jadx` CLI, and Ghidra on `librcipcam.so`. The APK was never run.
+This document gives the results of a static analysis of Weiview 1.0.29.
 
-## Short answer
+- File: `bad_app/Weiview_1.0.29_Apkpure.apk`
+- Package: `com.weiview`
+- SHA-256: `0c500a62…a4249`
 
-No spyware-style behavior was found. The app collects no contacts, SMS, accounts, device
-IDs or installed-app lists. It has no ad or analytics SDKs, no background services, no boot
-receivers, no dynamic code loading and no shell commands. **While installed, it did nothing
-unless you opened it.** When open, it found the camera on the local Wi-Fi, streamed video
-from `192.168.1.1:80`, and saved snapshots and recordings to `DCIM/xrcam/`.
+The analysis used REA (with its JADX and Apktool providers), the `jadx` CLI, and Ghidra on `librcipcam.so`.
+Nobody ran the APK.
 
-The Play Store ban and the Play Protect removal most likely come from what the app
-*bundles*, not from what Weiview itself runs. The app is a thin skin over a generic Chinese
-IP-camera SDK (SoSoCam / ReeCam). That SDK carries a cloud and P2P stack with poor security
-practices, plus a pile of over-broad, outdated permissions. The sections below list the
-likely triggers. Google does not publish the exact detection reason, so this part is
-inference.
+## Summary
 
-## What ran on your phone
+The analysis found no spyware behavior.
+The app does not collect contacts, SMS, accounts, device IDs or lists of installed apps.
+The app does not contain these items:
+
+- Ad SDKs or analytics SDKs
+- Background services
+- Boot receivers
+- Dynamic code loads
+- Shell commands
+
+**When the app was installed but not open, it did nothing.**
+When the app was open, it did these steps:
+
+1. It found the camera on the local Wi-Fi network.
+2. It received video from `192.168.1.1:80`.
+3. It saved snapshots and recordings in `DCIM/xrcam/`.
+
+The Play Store ban and the Play Protect removal probably come from the libraries in the app.
+They probably do not come from the operations of Weiview itself.
+The app is a thin layer on a generic Chinese IP camera SDK (SoSoCam/ReeCam).
+That SDK contains a cloud stack and a P2P stack with bad security practices.
+It also declares many permissions that are too broad or obsolete.
+The sections that follow give the probable causes.
+
+NOTE: Google does not publish the exact cause of a detection.
+Thus, the causes in this document are an inference.
+
+## Operations on the phone
 
 | When | What | Evidence |
 | --- | --- | --- |
-| App opened | Asked for location and storage permissions. Location is needed on Android to read Wi-Fi SSIDs. | `WelcomeActivity.getPermissions()` |
-| App opened | Took a Wi-Fi lock and a multicast lock and listened for connectivity changes, while the app was alive. | `IPCamMgr.init()` |
-| App opened | Loaded `librcipcam.so` and initialised the SDK. This sets up local state only. The P2P layer is initialised with an empty server list, so nothing goes out. | Ghidra: `RCIPCam_Init` → `init_rc_ipcam_lib` → `PPCS_Initialize("")` |
-| Searching for the camera | Sent LAN broadcast/multicast discovery packets. If no camera was found, it opened the system Wi-Fi picker. It does not switch networks by itself. | `IPCamMgr.StartDiscoverCameras`, `ConnFailDialog` (`PICK_WIFI_NETWORK`) |
-| Connected | Ran in "offline mode", connecting straight to the camera's IP on port 80. | `WelcomeActivity` (`g_offline_mode = true`, `start_connect(current_ip, 80, …)`) |
-| Snapshot/record | Wrote files to `DCIM/xrcam/…` on shared storage. | `Storage.get_album_folder2()` (`APPNAME = "xrcam"`) |
+| App opened | It asked for the location and storage permissions. Android requires the location permission to read Wi-Fi SSIDs. | `WelcomeActivity.getPermissions()` |
+| App opened | It got a Wi-Fi lock and a multicast lock, and monitored connectivity changes. It did this only while the app was in operation. | `IPCamMgr.init()` |
+| App opened | It loaded `librcipcam.so` and initialized the SDK. This sets only local state. The P2P layer gets an empty server list, thus it sends nothing. | Ghidra: `RCIPCam_Init` → `init_rc_ipcam_lib` → `PPCS_Initialize("")` |
+| Camera search | It sent LAN broadcast and multicast discovery packets. If it found no camera, it opened the system Wi-Fi picker. It did not change the network automatically. | `IPCamMgr.StartDiscoverCameras`, `ConnFailDialog` (`PICK_WIFI_NETWORK`) |
+| Connected | It operated in "offline mode", with a direct connection to port 80 at the IP address of the camera. | `WelcomeActivity` (`g_offline_mode = true`, `start_connect(current_ip, 80, …)`) |
+| Snapshot or recording | It wrote files to `DCIM/xrcam/…` on shared storage. | `Storage.get_album_folder2()` (`APPNAME = "xrcam"`) |
 
-What it did **not** do on the Weiview code path:
+On the Weiview code path, the app did **not** do these operations:
 
-- **Contact any cloud server.** The SDK holds a cloud client (`webservices.sosocam.com`,
-  `download.reecam.cn`, `push.reecam.cn`) and a P2P relay client. Weiview's camera ID
-  (`WeiView_Cam_ID`) matches none of the P2P ID patterns in `IPCam.get_p2p_svr()`, so no
-  P2P server is selected. The cloud login, account and push APIs in `WebService` are never
-  called from `com.weiview`. The only caller of the firmware update check is its own retry
-  callback, which never gets started.
-- **Open ports on your router.** The native lib contains miniupnpc (UPnP port mapping).
-  `upnp_add_port_mapping` is reachable only from `upnp_thread_handler`, and no code in the
-  disassembly starts that thread. That code is meant for the camera side.
-- **Run in the background.** The manifest declares no services, receivers or alarms. Five
-  activities and a non-exported FileProvider make up the whole app.
+- **It did not connect to a cloud server.**
+  The SDK contains a cloud client (`webservices.sosocam.com`, `download.reecam.cn`, `push.reecam.cn`).
+  It also contains a P2P relay client.
+  The Weiview camera ID (`WeiView_Cam_ID`) does not agree with the P2P ID patterns in `IPCam.get_p2p_svr()`.
+  Thus, the SDK selects no P2P server.
+  The code in `com.weiview` does not call the cloud login, account or push APIs in `WebService`.
+  Only its own retry callback calls the firmware update check, and nothing starts that callback.
+- **It did not open ports on the router.**
+  The native library contains miniupnpc (UPnP port mapping).
+  Only `upnp_thread_handler` calls `upnp_add_port_mapping`.
+  No code in the disassembly starts that thread.
+  That code is for the camera side.
+- **It did not operate in the background.**
+  The manifest declares no services, receivers or alarms.
+  The full app is five activities and a FileProvider that is not exported.
 
-## Likely reasons for the ban and Play Protect flag
+## Probable causes of the ban and the Play Protect flag
 
-1. **Bundled P2P/NAT-traversal SDK.** `librcipcam.so` statically links the CS2 Network
-   "PPPP/PPCS" P2P library (`PPCS_ConnectByServer`, `PPPP_Proto_Send_P2PReq`,
-   `gP2PServerAddr`), relay and tunnel sessions, and a local TCP listener
-   (`new_async_tcp_socket_4_p2pagent_listen`). It also includes UPnP IGD port mapping and
-   pinhole code (`UPNP_AddPortMapping`, `UPNP_AddPinhole`). This SDK family has a long
-   record of vulnerabilities in cheap IP cameras. Scanners flag apps that can open phone
-   or router ports to the internet, whether or not a given app uses that path.
-2. **Insecure cloud client.** The `WebService` login sends username and password as URL
-   query parameters (`client.php?act=login&username=…&password=…`). The native HTTP client
-   uses a fake User-Agent (`myclient/1.0 me@null.net`). This code is unused by Weiview but
-   ships in the APK.
-3. **Over-broad and obsolete permissions.** `SYSTEM_ALERT_WINDOW` (draw over other apps),
-   `MOUNT_UNMOUNT_FILESYSTEMS`, `READ_OWNER_DATA`/`WRITE_OWNER_DATA`,
-   `ACCESS_LOCATION_EXTRA_COMMANDS` and `requestLegacyExternalStorage` are declared. Overlay
-   and mount are never used in the app code. Play policy rejects undeclared or unjustified
-   sensitive permissions, and a draw-over-apps permission with no use case is a classic
-   malware signal.
-4. **Abandoned app.** It targets SDK 30 and uses the old `android.support` libraries.
-   Google Play hides or removes apps that stop meeting target-API and policy deadlines, so
-   the delisting may be partly administrative.
+1. **The P2P and NAT traversal SDK.**
+   `librcipcam.so` contains a static copy of the CS2 Network "PPPP/PPCS" P2P library.
+   Examples are `PPCS_ConnectByServer`, `PPPP_Proto_Send_P2PReq` and `gP2PServerAddr`.
+   The library also contains relay sessions, tunnel sessions and a local TCP listener (`new_async_tcp_socket_4_p2pagent_listen`).
+   It also contains UPnP IGD port mapping and pinhole code (`UPNP_AddPortMapping`, `UPNP_AddPinhole`).
+   Many vulnerabilities in cheap IP cameras come from this SDK family.
+   Scanners flag apps that can open phone or router ports to the internet.
+   They do this also when the app does not use that code path.
+2. **The cloud client is not secure.**
+   The `WebService` login sends the user name and the password as URL query parameters (`client.php?act=login&username=…&password=…`).
+   The native HTTP client sends a false User-Agent (`myclient/1.0 me@null.net`).
+   Weiview does not use this code, but the code is in the APK.
+3. **The permissions are too broad or obsolete.**
+   The app declares these permissions and attributes:
+   - `SYSTEM_ALERT_WINDOW` (draw over other apps)
+   - `MOUNT_UNMOUNT_FILESYSTEMS`
+   - `READ_OWNER_DATA` and `WRITE_OWNER_DATA`
+   - `ACCESS_LOCATION_EXTRA_COMMANDS`
+   - `requestLegacyExternalStorage`
 
-## Is there anything to clean up?
+   The app code does not use the overlay permission or the mount permission.
+   Play policy rejects sensitive permissions that the developer does not declare and explain.
+   A draw-over-apps permission with no use is a usual sign of malware.
+4. **The developer abandoned the app.**
+   The app targets SDK 30 and uses the old `android.support` libraries.
+   Google Play hides or removes apps that do not meet the target API and policy deadlines.
+   Thus, the removal can be partly administrative.
 
-Probably not. Uninstalling the app removes everything it ran. The leftovers are:
+## Items to remove
 
-- Photos and videos in `DCIM/xrcam/` (and possibly an empty `DCIM/UCCAM/`), which are your
-  own files and stay after uninstall.
-- A saved Wi-Fi network for the camera's access point, if you joined it. Forget it in
-  Wi-Fi settings if you like.
-- The app had location permission while installed. Because it never contacted a server,
-  no location data left the phone.
+Probably, you do not have to remove anything.
+When you uninstall the app, all of its code goes away.
+These items stay:
 
-## Caveats
+- Photos and videos in `DCIM/xrcam/`, and possibly an empty `DCIM/UCCAM/` directory.
+  These are your files, and they stay after you uninstall the app.
+- A saved Wi-Fi network for the access point of the camera, if you connected to it.
+  You can remove it in the Wi-Fi settings.
+- The app had the location permission while it was installed.
+  The app did not connect to a server, thus no location data went off the phone.
 
-- Static analysis only. Runtime behavior was not captured. A server-side change could not
-  have altered behavior, though, because the app downloads no code or config that changes
-  its logic.
-- The native lib was analyzed only for UPnP/P2P/HTTP reachability, not function by
-  function. It is mostly stock FFmpeg, OpenSSL, libevent, WebRTC AEC and miniupnpc.
-  The hardcoded IPs `18.244.0.188`, `2001:4860:b002::68` and `1.2.3.4` are stock libevent
-  constants for interface detection and are never contacted.
+## Limits of the analysis
+
+- The analysis was static only.
+  Nobody recorded the runtime behavior.
+  But a server-side change cannot change the behavior of the app.
+  The reason is that the app downloads no code or configuration that changes its logic.
+- The analysis of the native library examined only the UPnP, P2P and HTTP code paths.
+  It did not examine each function.
+  Most of the library is standard FFmpeg, OpenSSL, libevent, WebRTC AEC and miniupnpc.
+- The library contains the IP addresses `18.244.0.188`, `2001:4860:b002::68` and `1.2.3.4`.
+  These are standard libevent constants for interface detection.
+  The library does not connect to them.

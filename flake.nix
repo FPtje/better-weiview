@@ -1,5 +1,5 @@
 {
-  description = "Better Weiview: Android build + REA reverse-engineering tooling";
+  description = "Better Weiview: Android build and reverse-engineering tooling";
 
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
 
@@ -55,18 +55,13 @@
         ln -s ${platform372} $out/platforms/android-37.2
       '';
 
-      jadxMcpJar = pkgs.fetchurl {
-        url = "https://github.com/1013503897/jadx-headless-mcp/releases/download/v0.7.1/jadx-headless-mcp-0.7.1-all.jar";
-        sha256 = "6e5eacf500b64292bfb73c49797c1958f6ee44646e43e868039ae7feb573ff75";
-      };
-
       jdk = pkgs.jdk25;
     in
     {
       devShells.${system}.default = pkgs.mkShell {
         packages = [
           jdk
-          pkgs.nodejs # REA MCP server runs through npx
+          pkgs.just
           pkgs.jadx
           pkgs.apktool
           pkgs.ghidra
@@ -78,9 +73,6 @@
         JAVA_HOME = "${jdk}/lib/openjdk";
         ANDROID_HOME = "${sdkRoot}";
         ANDROID_SDK_ROOT = "${sdkRoot}";
-        REA_JADX_MCP_JAR = "${jadxMcpJar}";
-        REA_APKTOOL_COMMAND = "${pkgs.apktool}/bin/apktool";
-        REA_ADB_PATH = "${sdkRoot}/platform-tools/adb";
         GHIDRA_INSTALL_DIR = "${pkgs.ghidra}/lib/ghidra";
 
         shellHook = ''
