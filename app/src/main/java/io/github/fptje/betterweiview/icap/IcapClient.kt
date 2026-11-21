@@ -1,4 +1,4 @@
-package nl.falcop.betterweiview.icap
+package io.github.fptje.betterweiview.icap
 
 import android.net.Network
 import android.os.SystemClock

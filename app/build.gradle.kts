@@ -6,14 +6,14 @@ plugins {
 }
 
 android {
-    namespace = "nl.falcop.betterweiview"
+    namespace = "io.github.fptje.betterweiview"
     buildToolsVersion = "37.0.0"
     compileSdk {
         version = release(37) { minorApiLevel = 2 }
     }
 
     defaultConfig {
-        applicationId = "nl.falcop.betterweiview"
+        applicationId = "io.github.fptje.betterweiview"
         minSdk = 29
         targetSdk = 36
         versionCode = 1

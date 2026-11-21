@@ -1,4 +1,4 @@
-package nl.falcop.betterweiview.icap
+package io.github.fptje.betterweiview.icap
 
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals

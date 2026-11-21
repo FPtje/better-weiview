@@ -1,6 +1,6 @@
 # Tasks for Better Weiview. Run them inside the Nix dev shell (direnv or `nix develop`).
 
-app_id := "nl.falcop.betterweiview"
+app_id := "io.github.fptje.betterweiview"
 
 # Show the list of recipes.
 default:

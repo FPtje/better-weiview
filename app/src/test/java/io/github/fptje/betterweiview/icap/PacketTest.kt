@@ -1,4 +1,4 @@
-package nl.falcop.betterweiview.icap
+package io.github.fptje.betterweiview.icap
 
 import java.io.ByteArrayInputStream
 import java.io.DataInputStream

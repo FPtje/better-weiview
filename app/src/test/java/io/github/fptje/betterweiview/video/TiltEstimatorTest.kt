@@ -1,4 +1,4 @@
-package nl.falcop.betterweiview.video
+package io.github.fptje.betterweiview.video
 
 import org.junit.Assert.assertEquals
 import org.junit.Test

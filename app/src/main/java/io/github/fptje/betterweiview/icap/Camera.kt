@@ -1,4 +1,4 @@
-package nl.falcop.betterweiview.icap
+package io.github.fptje.betterweiview.icap
 
 /** Fixed facts about the ear cam (docs/icap-protocol.md, "Transport"). */
 object Camera {

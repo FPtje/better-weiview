@@ -1,4 +1,4 @@
-package nl.falcop.betterweiview
+package io.github.fptje.betterweiview
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -9,10 +9,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import nl.falcop.betterweiview.net.CameraNetworkMonitor
-import nl.falcop.betterweiview.ui.AppTheme
-import nl.falcop.betterweiview.ui.ConnectScreen
-import nl.falcop.betterweiview.ui.VideoScreen
+import io.github.fptje.betterweiview.net.CameraNetworkMonitor
+import io.github.fptje.betterweiview.ui.AppTheme
+import io.github.fptje.betterweiview.ui.ConnectScreen
+import io.github.fptje.betterweiview.ui.VideoScreen
 
 class MainActivity : ComponentActivity() {
     private lateinit var monitor: CameraNetworkMonitor

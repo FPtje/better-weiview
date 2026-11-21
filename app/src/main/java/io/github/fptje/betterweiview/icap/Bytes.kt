@@ -1,4 +1,4 @@
-package nl.falcop.betterweiview.icap
+package io.github.fptje.betterweiview.icap
 
 // Little-endian integer helpers. All multi-byte fields in the protocol are little-endian.
 

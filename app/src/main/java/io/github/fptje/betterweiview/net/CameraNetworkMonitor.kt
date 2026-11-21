@@ -1,4 +1,4 @@
-package nl.falcop.betterweiview.net
+package io.github.fptje.betterweiview.net
 
 import android.content.Context
 import android.net.ConnectivityManager
@@ -18,7 +18,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import nl.falcop.betterweiview.icap.Camera
+import io.github.fptje.betterweiview.icap.Camera
 
 /**
  * Watches Wi-Fi networks and reports the one where the ear cam answers at

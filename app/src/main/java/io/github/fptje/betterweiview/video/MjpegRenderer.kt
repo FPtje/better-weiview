@@ -1,4 +1,4 @@
-package nl.falcop.betterweiview.video
+package io.github.fptje.betterweiview.video
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory

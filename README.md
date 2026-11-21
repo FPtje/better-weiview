@@ -93,7 +93,7 @@ The `--iface` option is necessary when a different interface is also on `192.168
 
 ## Source layout
 
-All Kotlin source files are in `app/src/main/java/nl/falcop/betterweiview/`.
+All Kotlin source files are in `app/src/main/java/io/github/fptje/betterweiview/`.
 
 | Path | Contents |
 | --- | --- |

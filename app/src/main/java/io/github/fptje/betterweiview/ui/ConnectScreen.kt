@@ -1,4 +1,4 @@
-package nl.falcop.betterweiview.ui
+package io.github.fptje.betterweiview.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -13,7 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import nl.falcop.betterweiview.R
+import io.github.fptje.betterweiview.R
 
 /** The start screen: one Connect button, enabled while the camera is reachable. */
 @Composable

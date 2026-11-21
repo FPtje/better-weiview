@@ -1,4 +1,4 @@
-package nl.falcop.betterweiview.icap
+package io.github.fptje.betterweiview.icap
 
 /** One complete video frame from the camera (docs/icap-protocol.md, "Video frames"). */
 class VideoFrame(

@@ -1,4 +1,4 @@
-package nl.falcop.betterweiview.ui
+package io.github.fptje.betterweiview.ui
 
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme

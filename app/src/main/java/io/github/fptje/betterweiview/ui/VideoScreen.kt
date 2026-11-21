@@ -1,4 +1,4 @@
-package nl.falcop.betterweiview.ui
+package io.github.fptje.betterweiview.ui
 
 import android.content.Context
 import android.net.Network
@@ -50,12 +50,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
-import nl.falcop.betterweiview.R
-import nl.falcop.betterweiview.icap.IcapClient
-import nl.falcop.betterweiview.icap.IcapException
-import nl.falcop.betterweiview.icap.VideoFrame
-import nl.falcop.betterweiview.video.MjpegRenderer
-import nl.falcop.betterweiview.video.TiltEstimator
+import io.github.fptje.betterweiview.R
+import io.github.fptje.betterweiview.icap.IcapClient
+import io.github.fptje.betterweiview.icap.IcapException
+import io.github.fptje.betterweiview.icap.VideoFrame
+import io.github.fptje.betterweiview.video.MjpegRenderer
+import io.github.fptje.betterweiview.video.TiltEstimator
 
 /** Full-screen live view with the auto-rotate toggle. Calls [onExit] on back or a fatal error. */
 @Composable

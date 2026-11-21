@@ -1,4 +1,4 @@
-package nl.falcop.betterweiview.video
+package io.github.fptje.betterweiview.video
 
 import kotlin.math.atan2
 import kotlin.math.cos
