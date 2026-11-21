@@ -1,13 +1,44 @@
 # Better Weiview
 
-Better Weiview is a small Android viewer for the Weiview Wi-Fi ear cam.
-The app has one **Connect** button.
-The button is active when the phone is on the Wi-Fi network of the camera.
-When you push the button, the app shows the live video on the full screen.
+Better Weiview is a minimalist Android viewer for the Weiview/Reecam Wi-Fi ear cam.
 
-The app uses a clean-room implementation of the proprietary camera protocol.
-The protocol specification is in [`docs/icap-protocol.md`](docs/icap-protocol.md).
-The app does not use code from the vendor app, because Play Protect identifies that app as malware.
+It was created, because for the longest time, the original WeiView was removed from the Android Play store.
+It is back now, but still, this app is much simpler and more performant. That, and it uses way fewer privileges, and will work on modern phones.
+
+NOTE: The app does **not** use code from the original Weiview app
+
+| Connect screen | Video | Video with auto-rotate |
+| --- | --- | --- |
+| ![Connect screen](docs/screenshots/connect.png) | ![Video without auto-rotate](docs/screenshots/video-fixed.png) | ![Video with auto-rotate](docs/screenshots/video-autorotate.png) |
+
+Note: this app does _not_ have the ability to take photos or videos. If you want this, please write an issue. I figured for now screenshots and screen recordings would work _well enough_. This keeps the app extremely simple.
+
+## Maintenance status
+
+This is _Personal software_, meaning that the main audience for this software is myself. Feel free to try it out, fork it, play with it.
+If you do hit a problem or would like to request a feature, feel free to still write a quick issue. I will consider maintaining it properly if there is interest.
+
+## Use the app
+
+1. Turn on the ear cam.
+2. On the phone, connect to the Wi-Fi network of the camera (`weiview-XXXX`).
+3. Open Better Weiview.
+   The button becomes active when the camera answers at `192.168.1.1`.
+   The app does a reachability test, thus it does not need the location permission.
+4. Push **Connect** to show the video on the full screen.
+5. To stop the video, push the back button.
+
+The **Auto-rotate with camera** checkbox is below the video.
+When it is on, the app uses the accelerometer of the camera to keep the picture upright.
+The app also cuts the picture to a circle.
+The app keeps this setting when you close it.
+
+The app sends all camera traffic through the Wi-Fi network of the camera.
+Thus, you can keep mobile data on.
+
+## Learn how the camera protocol works
+
+See the [Icap protocol](./docs/icap-protocol.md) for details on the communication protocol with the WeiView camera. Fun fact: the encryption key is `hello kitty and kgb/cia 2011 COPYRIGHT@REECAM 5460`, which was previously also mentioned in [this blog post from 2016](http://gw.tnode.com/drone/micro-drone-3-0-camera-api/).
 
 ## Set up the tools
 
@@ -60,24 +91,6 @@ If you lose the key, you cannot sign updates for the installed app.
 
 NOTE: The debug build and the release build have different signatures.
 To change from one build to the other, uninstall the app first.
-
-## Use the app
-
-1. Turn on the ear cam.
-2. On the phone, connect to the Wi-Fi network of the camera (`weiview-XXXX`).
-3. Open Better Weiview.
-   The button becomes active when the camera answers at `192.168.1.1`.
-   The app does a reachability test, thus it does not need the location permission.
-4. Push **Connect** to show the video on the full screen.
-5. To stop the video, push the back button.
-
-The **Auto-rotate with camera** checkbox is below the video.
-When it is on, the app uses the accelerometer of the camera to keep the picture upright.
-The app also cuts the picture to a circle.
-The app keeps this setting when you close it.
-
-The app sends all camera traffic through the Wi-Fi network of the camera.
-Thus, you can keep mobile data on.
 
 ## Laptop prototype
 
